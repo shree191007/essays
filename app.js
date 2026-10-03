@@ -13,7 +13,7 @@ async function render() {
     let body = "<p>Couldn't load this post.</p>";
     try { body = await (await fetch(`content/${post.slug}.html`, { cache: "no-cache" })).text(); } catch {}
     app.innerHTML = `<a class="back" href="#/">← All posts</a>
-      <article class="post"><h1>${esc(post.title)}</h1><p class="meta"><a href="posts/${encodeURIComponent(post.file)}" target="_blank">Original PDF</a></p>${body}</article>`;
+      <article class="post"><h1>${esc(post.title)}</h1>${body}</article>`;
     scrollTo(0, 0);
     return;
   }
