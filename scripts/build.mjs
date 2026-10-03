@@ -100,7 +100,7 @@ for (const file of readdirSync("posts").filter((f) => f.toLowerCase().endsWith("
   const m = base.match(/^(\d{4}-\d{2}-\d{2})[\s_-]+(.*)$/);
   const date = m ? m[1] : statSync(join("posts", file)).mtime.toISOString().slice(0, 10);
   const fileTitle = (m ? m[2] : base).replace(/[_-]+/g, " ").trim();
-  const slug = base.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const slug = (m ? m[2] : base).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const { html, subtitle, byline, words } = toHtml(await extract(join("posts", file)));
   writeFileSync(join("content", slug + ".html"), html);
   posts.push({ slug, file, title: fileTitle, subtitle, author: byline.split("·")[1]?.trim() || "", minutes: Math.max(1, Math.round(words / 220)), date });
