@@ -12,6 +12,7 @@ jobs:
       - run: npm ci
       - run: node scripts/build.mjs
       - run: mkdir _site && cp -r index.html style.css app.js posts.json content posts _site/
+      - run: sed -i "s/style.css\"/style.css?v=${GITHUB_SHA::7}\"/; s/app.js\"/app.js?v=${GITHUB_SHA::7}\"/" _site/index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with: { path: _site }
