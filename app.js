@@ -24,3 +24,9 @@ async function render() {
 }
 addEventListener("hashchange", render);
 render();
+
+const btn = document.getElementById("theme"), root = document.documentElement;
+const cur = () => root.dataset.theme || "light";
+const sync = () => (btn.textContent = cur() === "dark" ? "light" : "dark");
+btn.onclick = () => { root.dataset.theme = cur() === "dark" ? "light" : "dark"; try { localStorage.setItem("theme", root.dataset.theme); } catch {} sync(); };
+sync();
