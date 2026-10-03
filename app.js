@@ -20,6 +20,23 @@ async function render() {
       ${post.subtitle ? `<p class="sub">${esc(post.subtitle)}</p>` : ""}
       <div class="meta-line">${fmt(post.date)}</div></header>
       <article class="post">${body}</article>`;
+    const heads = [...app.querySelectorAll(".post h2")];
+    if (heads.length > 1) {
+      heads.forEach((h, i) => (h.id = "ch-" + (i + 1)));
+      const toc = document.createElement("nav");
+      toc.className = "toc";
+      toc.innerHTML = `<div class="mono">CHAPTERS</div><ol>${heads.map((h, i) => {
+        const k = h.querySelector(".kicker");
+        return `<li><a href="#ch-${i + 1}" data-ch="ch-${i + 1}"><span class="n">${pad(i + 1)}</span><span class="k">${k ? esc(k.textContent) : ""}</span><span class="t">${esc(h.textContent.replace(k ? k.textContent : "", "").trim() || h.textContent)}</span></a></li>`;
+      }).join("")}</ol>`;
+      app.querySelector(".post").prepend(toc);
+      toc.addEventListener("click", (e) => {
+        const l = e.target.closest("[data-ch]");
+        if (!l) return;
+        e.preventDefault();
+        document.getElementById(l.dataset.ch).scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
     scrollTo(0, 0);
     return;
   }
