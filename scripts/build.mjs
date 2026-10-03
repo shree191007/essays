@@ -1,6 +1,6 @@
 // Converts every PDF in /posts into reflowed HTML (content/<slug>.html) and writes posts.json.
 // Name files "YYYY-MM-DD Title.pdf" to control date + title. The first large heading becomes the title.
-import { readdirSync, readFileSync, statSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
 
@@ -93,6 +93,7 @@ function toHtml(lines) {
 
 rmSync("content", { recursive: true, force: true });
 mkdirSync("content");
+const interludes = existsSync("interludes.json") ? JSON.parse(readFileSync("interludes.json", "utf8")) : {};
 const posts = [];
 for (const file of readdirSync("posts").filter((f) => f.toLowerCase().endsWith(".pdf"))) {
   const base = file.replace(/\.pdf$/i, "");
@@ -101,7 +102,13 @@ for (const file of readdirSync("posts").filter((f) => f.toLowerCase().endsWith("
   const fileTitle = (m ? m[2] : base).replace(/[_-]+/g, " ").trim();
   const slug = base.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const { html, subtitle, byline, words } = toHtml(await extract(join("posts", file)));
-  writeFileSync(join("content", slug + ".html"), html);
+  let out = html;
+  for (const { after, html: extra } of interludes[slug] || []) {
+    const tag = `<p>${esc(after)}</p>`;
+    if (out.includes(tag)) out = out.replace(tag, tag + "\n" + extra);
+    else console.warn(`interlude not placed in ${slug}: "${after}"`);
+  }
+  writeFileSync(join("content", slug + ".html"), out);
   posts.push({ slug, file, title: fileTitle, subtitle, author: byline.split("·")[1]?.trim() || "", minutes: Math.max(1, Math.round(words / 220)), date });
 }
 posts.sort((a, b) => b.date.localeCompare(a.date));
