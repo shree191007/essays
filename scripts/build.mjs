@@ -67,18 +67,28 @@ function toHtml(lines) {
   let title = null;
   if (blocks[0]?.t === "h" && level(blocks[0].size) === 1) title = blocks.shift().text;
   let html = "", inList = false;
+  let byline = "", subtitle = "", first = true;
   if (title && blocks[0]?.t === "p" && /·/.test(blocks[0].text) && blocks[0].text.length < 80) {
-    html += `<p class="byline">${esc(blocks.shift().text)}</p>\n`;
-    if (blocks[0]?.t === "p" && blocks[0].text.length < 140) html += `<p class="subtitle">${esc(blocks.shift().text)}</p>\n`;
+    byline = blocks.shift().text;
+    if (blocks[0]?.t === "p" && blocks[0].text.length < 140) subtitle = blocks.shift().text;
   }
+  const words = blocks.reduce((n, b) => n + b.text.split(/\s+/).length, 0);
   for (const b of blocks) {
     if (b.t !== "li" && inList) { html += "</ul>\n"; inList = false; }
     if (b.t === "li") { if (!inList) { html += "<ul>\n"; inList = true; } html += `<li>${esc(b.text)}</li>\n`; }
-    else if (b.t === "h") { const n = Math.min(Math.max(title ? level(b.size) : level(b.size) + 1, 2), 4); html += `<h${n}>${esc(b.text)}</h${n}>\n`; }
+    else if (b.t === "h") {
+      const n = Math.min(Math.max(title ? level(b.size) : level(b.size) + 1, 2), 4);
+      if (n === 2) {
+        const [k, ...rest] = b.text.split(/:\s+/);
+        const inner = rest.length ? `<span class="kicker">${esc(k)}</span>${esc(rest.join(": "))}` : esc(b.text);
+        html += `${first ? "" : '<div class="rule" aria-hidden="true">◇</div>\n'}<h2>${inner}</h2>\n`;
+        first = false;
+      } else html += `<h${n}>${esc(b.text)}</h${n}>\n`;
+    }
     else html += `<p>${esc(b.text)}</p>\n`;
   }
   if (inList) html += "</ul>\n";
-  return { html, title };
+  return { html, title, byline, subtitle, words };
 }
 
 rmSync("content", { recursive: true, force: true });
@@ -90,9 +100,9 @@ for (const file of readdirSync("posts").filter((f) => f.toLowerCase().endsWith("
   const date = m ? m[1] : statSync(join("posts", file)).mtime.toISOString().slice(0, 10);
   const fileTitle = (m ? m[2] : base).replace(/[_-]+/g, " ").trim();
   const slug = base.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-  const { html, title } = toHtml(await extract(join("posts", file)));
+  const { html, subtitle, byline, words } = toHtml(await extract(join("posts", file)));
   writeFileSync(join("content", slug + ".html"), html);
-  posts.push({ slug, file, title: fileTitle, date });
+  posts.push({ slug, file, title: fileTitle, subtitle, author: byline.split("·")[1]?.trim() || "", minutes: Math.max(1, Math.round(words / 220)), date });
 }
 posts.sort((a, b) => b.date.localeCompare(a.date));
 writeFileSync("posts.json", JSON.stringify(posts, null, 2));
