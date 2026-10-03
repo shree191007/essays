@@ -67,6 +67,10 @@ function toHtml(lines) {
   let title = null;
   if (blocks[0]?.t === "h" && level(blocks[0].size) === 1) title = blocks.shift().text;
   let html = "", inList = false;
+  if (title && blocks[0]?.t === "p" && /·/.test(blocks[0].text) && blocks[0].text.length < 80) {
+    html += `<p class="byline">${esc(blocks.shift().text)}</p>\n`;
+    if (blocks[0]?.t === "p" && blocks[0].text.length < 140) html += `<p class="subtitle">${esc(blocks.shift().text)}</p>\n`;
+  }
   for (const b of blocks) {
     if (b.t !== "li" && inList) { html += "</ul>\n"; inList = false; }
     if (b.t === "li") { if (!inList) { html += "<ul>\n"; inList = true; } html += `<li>${esc(b.text)}</li>\n`; }
@@ -88,7 +92,7 @@ for (const file of readdirSync("posts").filter((f) => f.toLowerCase().endsWith("
   const slug = base.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const { html, title } = toHtml(await extract(join("posts", file)));
   writeFileSync(join("content", slug + ".html"), html);
-  posts.push({ slug, file, title: m || !title ? fileTitle : title, date });
+  posts.push({ slug, file, title: fileTitle, date });
 }
 posts.sort((a, b) => b.date.localeCompare(a.date));
 writeFileSync("posts.json", JSON.stringify(posts, null, 2));

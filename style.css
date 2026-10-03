@@ -21,3 +21,4 @@ h1{font:500 clamp(36px,6vw,56px)/1.1 Georgia,"Times New Roman",serif;letter-spac
 .foot{max-width:960px;margin:0 auto;padding:24px;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
 code{background:var(--card);padding:2px 6px;border-radius:4px;font-size:.9em}
 @media(max-width:600px){.row{grid-template-columns:1fr;gap:4px}.tag{display:none}}
+.post .byline{color:var(--muted);font:15px -apple-system,system-ui,sans-serif;margin:0 0 .4em}.post .subtitle{font-size:22px;color:var(--muted);font-style:italic;margin-bottom:1.6em}
