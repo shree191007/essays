@@ -1,0 +1,15 @@
+{
+  "name": "essay",
+  "version": "1.0.0",
+  "description": "Drop PDFs into `posts/` (name them `YYYY-MM-DD Title.pdf`), run `node scripts/build.mjs`, push. GitHub Pages deploys automatically.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "pdfjs-dist": "^4.10.38"
+  }
+}

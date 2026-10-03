@@ -1,5 +1,7 @@
 # Essays
 
-Drop PDFs into `posts/` (name them `YYYY-MM-DD Title.pdf`), run `node scripts/build.mjs`, push. GitHub Pages deploys automatically.
+Put PDFs in `posts/` (name them `YYYY-MM-DD Title.pdf`). They are converted into blog-style pages (headings, paragraphs, lists; images are not carried over).
 
-Local preview: `node scripts/build.mjs && python3 -m http.server`
+Preview: `npm ci && node scripts/build.mjs && python3 -m http.server`
+
+Pushing to `main` rebuilds and deploys via GitHub Pages.
